@@ -4,16 +4,29 @@
     hookall(className, cb) - Hooks all methods in the class.
 **/
 
-function getGenericInterceptor(className, func, parameters) {
+/**
+    printAllClasses() - Prints you all the classes loaded.
+    findMethod(searchStr) - Finds you methods containing the searchStr.
+    hookall(className, cb) - Hooks all methods in the class.
+**/
+
+function getGenericInterceptor(className, func, parameters, description) {
     args = []
     for (i = 0; i < parameters.length; i++) { 
             args.push('arg_' + i) 
     }
-    var script = "result = this.__FUNCNAME__(__SEPARATED_ARG_NAMES__);\nlogmessage = '__CLASSNAME__.__FUNCNAME__(' + __SEPARATED_ARG_NAMES__ + ') => ' + result;\nconsole.log(logmessage);\nreturn result;"
+    var script = "result = this.__FUNCNAME__(__SEPARATED_ARG_NAMES__);\nlogmessage = '__CLASSNAME__.__FUNCNAME__(' + __SEPARATED_ARG_NAMES__ + ')__DESCRIPTION__ => ' + result;\nconsole.log(logmessage);\nreturn result;"
     
     script = script.replace(/__FUNCNAME__/g, func);
     script = script.replace(/__SEPARATED_ARG_NAMES__/g, args.join(', '));
     script = script.replace(/__CLASSNAME__/g, className);
+    if(!description) {
+        description = '';
+    }
+    else {
+        description = '[' + description + ']';
+    }
+    script = script.replace(/__DESCRIPTION__/g, description);
     script = script.replace(/\+  \+/g, '+');
 
     args.push(script)
@@ -100,7 +113,7 @@ function printAllClasses() {
     });
 }
 
-function hook_overloaded_method(obj, func, args) {
+function hook_overloaded_method(obj, func, args, modify_args, filter, success) {
     try 
     {
         // var Exception = Java.use('java.lang.Exception'); 
@@ -111,24 +124,32 @@ function hook_overloaded_method(obj, func, args) {
             for(var arg in args) {
                 args2.push(args[arg].toString());
             }
-            args2 = args2.join(', ')
+            args2 = args2.join(', ');
+            if(modify_args) {
+                args = modify_args(args)
+            }
             var result = this[func].apply(this, args); 
             // var calledFrom = Exception.$new().getStackTrace().toString().split(',')[1];
-            var message = JSON.stringify(
-            { 
-                function: obj + "." + func, 
-                arguments: args2,
-                result: result.toString(),
-                // calledFrom: calledFrom
-            });            
-            console.log(message);
+            var resultString = result != null ? result.toString() : "No Result";
+            if((filter && filter(args, resultString)) || !filter) {
+                var message = JSON.stringify(
+                { 
+                    function: obj + "." + func, 
+                    arguments: (args2 != null && args2.length > 0) ? args2 : "No Arguments",
+                    result: resultString,
+                    // calledFrom: calledFrom
+                });            
+                // console.log(message);
+            }
             return result;
         } 
+
+        success();
     }
     catch (err) {
         console.log(obj + "." + func + "[\"Error\"] => " + err);
     }
-} 
+}
 
 if (Java.available) {
     // Switch to the Java context
