@@ -4,12 +4,6 @@
     hookall(className, cb) - Hooks all methods in the class.
 **/
 
-/**
-    printAllClasses() - Prints you all the classes loaded.
-    findMethod(searchStr) - Finds you methods containing the searchStr.
-    hookall(className, cb) - Hooks all methods in the class.
-**/
-
 function getGenericInterceptor(className, func, parameters, description) {
     args = []
     for (i = 0; i < parameters.length; i++) { 
@@ -154,12 +148,8 @@ function hook_overloaded_method(obj, func, args, modify_args, filter, success) {
 if (Java.available) {
     // Switch to the Java context
     Java.perform(function() {
-        // const JavaString = Java.use('java.lang.String');
-        // printAllClasses();
-        // Hook all init overloads
-        
-        // findMethod("start");
-
-        hookall('org.json.JSONObject', 'a');
+        //OTHERS_TO_ADD
+        //CLASSES_TO_ADD
+        //METHODS_TO_ADD
     });
 }
