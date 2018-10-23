@@ -46,6 +46,9 @@ if num_args > 2:
          js += placeholder
          frida_code = replace_code(frida_code, js, placeholder)
       elif opt in ("-c", "--classes"):
+         if not arg:
+            print 'Not enought arguments!'
+            sys.exit(2)
          placeholder = '//CLASSES_TO_ADD'
          classes = arg
          classes = classes.split(',')
@@ -54,6 +57,9 @@ if num_args > 2:
          js += placeholder
          frida_code = replace_code(frida_code, js, placeholder)
       elif opt in ("-m", "--methods"):
+         if not arg:
+            print 'Not enought arguments!'
+            sys.exit(2)
          placeholder = '//METHODS_TO_ADD'
          methods = arg
          methods = methods.split(',')
