@@ -4,22 +4,20 @@
     hookall(className, cb) - Hooks all methods in the class.
 **/
 
-const text_color_time = "\x1b[33m";
-const text_color_source = "\x1b[37m";
-const text_color_args = "\x1b[35m";
-const text_color_result = "\x1b[32m";
-
-function getTime() {
-    var date = new Date();
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
-    return hours + ":" + minutes + ":" + seconds;
+function log_msg(msg) {
+    var obj = {
+        "msg":msg
+    };
+    send(obj);
 }
 
-function log(time, source, args, result) {
-    var logmessage = text_color_time + '[' + time + '] ' + text_color_source + source + '(' + text_color_args + args + text_color_source + ') => ' + text_color_result + result;
-    console.log(logmessage);
+function log_event(source, args, result) {
+    var obj = {
+        "source":source,
+        "args":args,
+        "result":result
+    };
+    send(obj);
 }
 
 function getGenericInterceptor(className, func, parameters, description) {
@@ -56,7 +54,7 @@ function hookall(className, cb) {
             overloads = cls[func_name].overloads;
             for (i in overloads) {
                 if (overloads[i].hasOwnProperty('argumentTypes')) {
-                    console.log("Hooking class: " + className + " Function: " + func_name + "\n");
+                    log_msg("Hooking class: " + className + " Function: " + func_name + "\n");
                     var parameters = [];
                     for (j in overloads[i].argumentTypes) {
                         parameters.push(overloads[i].argumentTypes[j].className);
@@ -67,7 +65,7 @@ function hookall(className, cb) {
             }
         }   
         catch(e) {
-            console.log("Failed hooking class: " + className + " Function: " + func_name + "\n");
+            console.log_msg("Failed hooking class: " + className + " Function: " + func_name + "\n");
         }
     }
 }
@@ -78,7 +76,7 @@ function hook(className, func_name) {
         overloads = cls[func_name].overloads;
         for (i in overloads) {
             if (overloads[i].hasOwnProperty('argumentTypes')) {
-                console.log("Hooking class: " + className + " Function: " + func_name + "\n");
+                log_msg("Hooking class: " + className + " Function: " + func_name + "\n");
                 var parameters = [];
                 for (j in overloads[i].argumentTypes) {
                     parameters.push(overloads[i].argumentTypes[j].className);
@@ -91,20 +89,16 @@ function hook(className, func_name) {
                     }
                     args2 = args2.join(', ');
                     var result = this[func_name].apply(this, args); 
-                    // var calledFrom = Exception.$new().getStackTrace().toString().split(',')[1];
                     var resultString = result != null ? result.toString() : "No Result";
                     var argsString = (args2 != null && args2.length > 0) ? args2 : "";
-                    log(getTime(), className + '.' + func_name, argsString, resultString);
+                    log_event(className + '.' + func_name, argsString, resultString);
                     return result;
                 }
-
-                // const cb = getGenericInterceptor(className, func_name, parameters);
-                // cls[func_name].overload.apply('this', parameters).implementation = cb;
             }
         }
     }   
     catch(e) {
-        console.log("Failed hooking class: " + className + " Function: " + func_name + "\n");
+        log_msg("Failed hooking class: " + className + " Function: " + func_name + "\n");
     }
 }
 

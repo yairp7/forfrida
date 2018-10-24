@@ -15,6 +15,18 @@ if num_args < 2:
 js_file = open('hook.js', 'rw+')
 frida_code = js_file.read()
 
+colors = { "time" : "\x1b[33m", "source" : "\x1b[37m", "args" : "\x1b[35m", "result" : "\x1b[32m" }
+
+def getTime():
+   return time.strftime("%H:%M:%S")
+
+def baselog(msg):
+   logmessage = colors['time'] + '[' + getTime() + '] ' + colors['source'] + msg
+   print logmessage
+
+def log(source, args, result):
+   baselog(colors['source'] + source + '(' + colors['args'] + args + colors['source'] + ') => ' + colors['result'] + result)
+
 def replace_code(frida_code, new_code, placeholder):
    to_replace = placeholder
    to_replace_length = len(to_replace)
@@ -76,7 +88,21 @@ if num_args > 2:
 js_file.close()
 
 def message_callback(message, data):
-    print(message)
+   if 'payload' in message:
+      if 'msg' in message['payload']:
+         msg = message['payload']['msg']
+         baselog(msg)
+      else:
+         source = 'No Source'
+         args = 'No Args'
+         result = 'No Result'
+         if 'source' in message['payload']:
+            source = message['payload']['source']
+         if 'args' in message['payload']:
+            args = message['payload']['args']
+         if 'result' in message['payload']:
+            result = message['payload']['result']
+         log(source, args, result)
 
 app = sys.argv[1] # <package>
 
