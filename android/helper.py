@@ -11,6 +11,8 @@ if num_args < 2:
    print 'Not enought arguments!'
    sys.exit(2)
 
+codes_added = []
+
 # JavaScript to be injected
 js_file = open('hook.js', 'rw+')
 frida_code = js_file.read()
@@ -34,6 +36,14 @@ def replace_code(frida_code, new_code, placeholder):
    frida_code_length = len(frida_code)
    return frida_code[0:index] + js + frida_code[index + to_replace_length:frida_code_length]
 
+def add_code(frida_code, code_filename):
+   if code_filename not in codes_added:
+      code_file = open('code/' + code_filename, 'r')
+      code = code_file.read()
+      frida_code = code + '\n' + frida_code
+      codes_added.append(code_filename)
+   return frida_code
+
 # See if theres relevant arguments
 if num_args > 2:
    classes = ''
@@ -53,6 +63,7 @@ if num_args > 2:
          print '-m <class1:method1,class2:method2,...> => Hook these specific methods'
          sys.exit()
       elif opt in ("-a", "--all-classes"):
+         frida_code = add_code(frida_code, 'print_classes.js')
          placeholder = '//OTHERS_TO_ADD'
          js = "printAllClasses();"
          js += placeholder
@@ -61,6 +72,7 @@ if num_args > 2:
          if not arg:
             print 'Not enought arguments!'
             sys.exit(2)
+         frida_code = add_code(frida_code, 'hook_class.js')
          placeholder = '//CLASSES_TO_ADD'
          classes = arg
          classes = classes.split(',')
@@ -72,6 +84,7 @@ if num_args > 2:
          if not arg:
             print 'Not enought arguments!'
             sys.exit(2)
+         frida_code = add_code(frida_code, 'hook_method.js')
          placeholder = '//METHODS_TO_ADD'
          methods = arg
          methods = methods.split(',')
@@ -79,11 +92,11 @@ if num_args > 2:
             mp = m.split(':')
             _c = mp[0]
             _m = mp[1]
-            js += "hook('" + _c + "', '" + _m + "');";
+            js += "hook('" + _c + "', '" + _m + "', false);";
          js += placeholder
          frida_code = replace_code(frida_code, js, placeholder)
 
-   print 'Frida Script:\n ' + frida_code
+   print 'Generated Script:\n ' + frida_code
 
 js_file.close()
 
