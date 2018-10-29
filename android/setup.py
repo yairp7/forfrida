@@ -4,6 +4,12 @@ from utils import _exec_command, _exec_command_timed, android_get_devices, basel
 FRIDA_SERVER_VERSION = '12.2.18'
 FRIDA_SERVER_PATH = '/data/local/tmp/frida-server';
 
+def install_frida_tools():
+	cmd = ['pip', 'install', 'frida-tools']
+	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+	p.wait()
+	return p.returncode == 0
+
 def setup():
 	# Check if frida-tools exists, and if not install
 	try:
@@ -11,19 +17,13 @@ def setup():
 		return True
 	except ImportError:
 		baselog('Frida is not installed, so installing...')
-		if(install_frida_tools() == 0):
+		if(install_frida_tools()):
 			baselog('Frida installed successfully!')
 			return True
 		else:
 			baselog('Failed to install frida, exiting!')
 			exit(2)
 	return False
-
-def install_frida_tools():
-	cmd = ['pip', 'install', 'frida-tools']
-	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-	p.wait()
-	return p.returncode == 0
 
 def android_is_device_rooted(device):
 	cmd = ['adb', '-s', device, 'shell', 'ls', '/data/data']
