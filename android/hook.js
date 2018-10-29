@@ -18,6 +18,14 @@ function log_event(source, args, result) {
     send(obj);
 }
 
+function send_command(cmd, params) {
+    var obj = {
+        "command":cmd,
+        "params":params
+    };
+    send(obj);
+}
+
 function getGenericInterceptor(className, func, parameters, description) {
     args = []
     for (i = 0; i < parameters.length; i++) { 
@@ -108,5 +116,6 @@ if (Java.available) {
         //OTHERS_TO_ADD
         //CLASSES_TO_ADD
         //METHODS_TO_ADD
+        // send_command('finish', [1]);
     });
 }

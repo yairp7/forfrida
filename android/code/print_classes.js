@@ -1,7 +1,8 @@
 function printAllClasses() {
     Java.enumerateLoadedClasses({
         "onMatch": function(className) {
-            console.log(className);           
+        	obj = { 'msg' : className }
+            send(obj);           
         },
         "onComplete":function() {
         }
