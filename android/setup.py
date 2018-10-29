@@ -23,7 +23,7 @@ def install_frida_tools():
 	cmd = ['pip', 'install', 'frida-tools']
 	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 	p.wait()
-	return p.returncode
+	return p.returncode == 0
 
 def android_is_device_rooted(device):
 	cmd = ['adb', '-s', device, 'shell', 'ls', '/data/data']
